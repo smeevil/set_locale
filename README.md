@@ -1,4 +1,6 @@
 # SetLocale
+![](https://img.shields.io/hexpm/v/set_locale.svg) ![](https://img.shields.io/hexpm/dt/set_locale.svg) ![](https://img.shields.io/hexpm/dw/set_locale.svg) ![](https://img.shields.io/coveralls/smeevil/set_locale.svg) ![](https://img.shields.io/github/issues/smeevil/set_locale.svg) ![](https://img.shields.io/github/issues-pr/smeevil/set_locale.svg) ![](https://semaphoreci.com/api/v1/smeevil/currency_formatter/branches/master/shields_badge.svg)
+
 
 This phoenix plug will help you with I18n url paths.
 It can extract the preffered locale from the browsers accept-language header and redirect if an url without locale has been given.
