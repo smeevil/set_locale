@@ -5,6 +5,8 @@ defmodule SetLocale.Mixfile do
     [
       app: :set_locale,
       version: "0.1.0",
+      description: "A Phoenix Plug to help with supporting I18n routes (http://www.example.org/de-at/foo/bar/az). Will also set Gettext to the requested locale used in the url when supported by your Gettext.",
+      package: package,
       elixir: "~> 1.3",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
