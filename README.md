@@ -31,7 +31,7 @@ defmodule MyApp.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     ...
-    plug SetLocale, [MyApp.Gettext, "en"]
+    plug SetLocale, [MyApp.Gettext, "en"] #here "en" would be your default locale
   end
 
   ...
