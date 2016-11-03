@@ -1,3 +1,0 @@
-msgid "Hello World"
-msgstr ""
-
