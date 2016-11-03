@@ -13,7 +13,7 @@ defmodule SetLocale do
     end
   end
 
-  def call(%{request_path: request_path} = conn, [gettext, default_locale]) do
+  def call(conn, [gettext, default_locale]) do
     path = rewrite_path(conn, gettext, default_locale)
     Gettext.put_locale(gettext, default_locale)
     conn |> assign(:locale, default_locale) |> redirect_to(path) |> halt
@@ -50,6 +50,6 @@ defmodule SetLocale do
   end
 
   defp get_redirect_path(%{query_string: query_string}, path) when query_string != "", do: path <> "?#{query_string}"
-  defp get_redirect_path(conn, path), do: path
+  defp get_redirect_path(_conn, path), do: path
 end
 
