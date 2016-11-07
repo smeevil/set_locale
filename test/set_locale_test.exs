@@ -67,9 +67,9 @@ defmodule SetLocaleTest do
     assert Gettext.get_locale(MyGettext) == "nl"
   end
 
-  test "when a locale is given that is not supported, it redirects to a default locale" do
-    conn = Phoenix.ConnTest.build_conn(:get, "/de-at/foo/bar/baz", %{"locale" => "de-at"}) |> SetLocale.call(@default_options)
-    assert redirected_to(conn) == "/en-gb/foo/bar/baz"
+  test "it should fallback to a parent language when a sibling does not exist, ie. nl-be should use nl" do
+    conn = Phoenix.ConnTest.build_conn(:get, "/nl-be/foo/bar/baz", %{"locale" => "nl-be"}) |> SetLocale.call(@default_options)
+    assert redirected_to(conn) == "/nl/foo/bar/baz"
   end
 
   test "should keep query strings as is" do

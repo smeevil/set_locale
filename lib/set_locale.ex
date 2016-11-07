@@ -8,7 +8,8 @@ defmodule SetLocale do
       Gettext.put_locale(gettext, requested_locale)
       conn |> assign(:locale, requested_locale)
     else
-      path = rewrite_path(conn, gettext, default_locale )
+      locale = determine_base_or_default_locale(gettext, requested_locale, default_locale)
+      path = rewrite_path(conn, gettext, locale )
       conn |> redirect_to(path) |> halt
     end
   end
@@ -17,6 +18,11 @@ defmodule SetLocale do
     path = rewrite_path(conn, gettext, default_locale)
     Gettext.put_locale(gettext, default_locale)
     conn |> assign(:locale, default_locale) |> redirect_to(path) |> halt
+  end
+
+  defp determine_base_or_default_locale(gettext, requested_locale, default_locale) do
+    [base, _dialect] = String.split(requested_locale, "-")
+    if (is_locale?(requested_locale) and Enum.member?(supported_locales(gettext), base)), do: base, else: default_locale
   end
 
   defp supported_locales(gettext), do: Gettext.known_locales(gettext)
