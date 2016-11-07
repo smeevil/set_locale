@@ -17,7 +17,7 @@ defmodule SetLocaleTest do
   test "when no locale is given and a root path is requested, it should redirect and set default locale" do
     assert Gettext.get_locale(MyGettext) == "en"
     conn = Phoenix.ConnTest.build_conn(:get, "/", %{}) |> SetLocale.call(@default_options)
-    assert redirected_to(conn) == "/en-gb/"
+    assert redirected_to(conn) == "/en-gb"
     assert conn.assigns == %{locale: "en-gb"}
     assert Gettext.get_locale(MyGettext) == "en-gb"
   end
@@ -28,7 +28,7 @@ defmodule SetLocaleTest do
     |> Plug.Conn.put_req_header("accept-language","de, en-gb;q=0.8, nl;q=0.9, en;q=0.7")
     |> SetLocale.call(@default_options)
 
-    assert redirected_to(conn) == "/nl/"
+    assert redirected_to(conn) == "/nl"
   end
 
   test "when no locale is given and headers contain accept-language but non is accepted, it should redirect to the default locale" do
@@ -37,7 +37,7 @@ defmodule SetLocaleTest do
     |> Plug.Conn.put_req_header("accept-language","de, fr;q=0.9, en-gb;q=0.8, en;q=0.7")
     |> SetLocale.call(@default_options)
 
-    assert redirected_to(conn) == "/en-gb/"
+    assert redirected_to(conn) == "/en-gb"
   end
 
   test "when no locale is given, it redirects to a prefix with default locale" do

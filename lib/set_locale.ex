@@ -40,9 +40,8 @@ defmodule SetLocale do
     "/" <> Enum.join(rest, "/")
   end
 
-  defp localize_path(request_path, locale) do
-    "/#{locale}#{request_path}"
-  end
+  defp localize_path("/", locale), do: "/#{locale}"
+  defp localize_path(request_path, locale), do: "/#{locale}#{request_path}"
 
   defp redirect_to(conn, path) do
     path = get_redirect_path(conn, path)

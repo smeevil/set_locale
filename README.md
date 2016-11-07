@@ -7,6 +7,7 @@ It can extract the preffered locale from the browsers accept-language header and
 It will extract the locale from the url and check if that is valid and supported. If so it will assign it to ```conn.assigns.locale``` and set ```Gettext``` to that locale as well.
 If it is not supported it will redirect to the default locale.
 
+ You might also be interested in [ecto_translate](https://github.com/smeevil/ecto_translate) which can help you with returning translated values of your Ecto data attributes.
 ## Examples
 
 Given that you define your default language to be "en" :
