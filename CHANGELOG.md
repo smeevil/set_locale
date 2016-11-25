@@ -1,3 +1,6 @@
+## 0.1.3 (2016-11-25)
+Including a bigfix by @dirkholzapfel which implement correct handling for URLs without given locale, Thanks !
+
 ## 0.1.2 (2016-11-07)
 Support fallback of base language, for example a requested /en-gb/ can fallback to /en/
 
