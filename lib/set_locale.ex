@@ -21,7 +21,7 @@ defmodule SetLocale do
   end
 
   defp determine_base_or_default_locale(gettext, requested_locale, default_locale) do
-    [base, _dialect] = String.split(requested_locale, "-")
+    base = hd String.split(requested_locale, "-")
     if (is_locale?(requested_locale) and Enum.member?(supported_locales(gettext), base)), do: base, else: default_locale
   end
 
