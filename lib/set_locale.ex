@@ -7,7 +7,7 @@ defmodule SetLocale do
 
   def init(gettext: gettext, default_locale: default_locale, cookie_key: cookie_key), do: %Config{gettext: gettext, default_locale: default_locale, cookie_key: cookie_key}
   def init(gettext: gettext, default_locale: default_locale), do: %Config{gettext: gettext, default_locale: default_locale, cookie_key: nil}
-  def init(gettext, default_locale) do
+  def init([gettext, default_locale]) do
     unless Mix.env == :test do
       IO.warn ~S(
         This config style has been deprecated for for set_locale. Please update the old style config:

@@ -15,7 +15,8 @@ defmodule SetLocaleTest do
   describe "init" do
 
     test "it supports a legacy config" do
-      assert SetLocale.init(MyGettext, "en-gb") == %SetLocale.Config{gettext: SetLocaleTest.MyGettext, default_locale: "en-gb", cookie_key: nil}
+
+      assert SetLocale.init([MyGettext, "en-gb"]) == %SetLocale.Config{gettext: SetLocaleTest.MyGettext, default_locale: "en-gb", cookie_key: nil}
     end
 
     test "it sets cookie_key to nil if not given" do
