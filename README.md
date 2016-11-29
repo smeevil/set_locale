@@ -22,6 +22,9 @@ When someone uses an unsupported locale in the url they will be redirect to the 
 
 When someone uses a url with no locale prefix, and their browser contains an accept-language string that contains a supported locale they will be redirect to that : ```http://www.example.org/foo/bar/baz``` they will be redirected to ```http://www.example.org/nl-nl/foo/bar/baz```
 
+## With a locale cookie
+
+When you have setup a locale cookie, the locale from the cookie will have precedence over default locale and locale from accept language header.
 
 ## Setup
 
@@ -34,7 +37,7 @@ defmodule MyApp.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     ...
-    plug SetLocale, [MyApp.Gettext, "en"] #here "en" would be your default locale
+    plug SetLocale, gettext: MyApp.Gettext, default_locale: "en", cookie_key: "project_locale" #cookie_key is optional
   end
 
   ...
@@ -51,7 +54,6 @@ defmodule MyApp.Router do
   end
 end
 ```
-
 
 
 ## Installation
