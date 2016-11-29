@@ -1,23 +1,27 @@
 defmodule SetLocale do
   import Plug.Conn
 
-  def init(settings), do: settings
+  def init(opts) do
+    gettext        = Keyword.fetch!(opts, :gettext)
+    default_locale = Keyword.fetch!(opts, :default_locale)
+    cookie_key  = Keyword.get(opts, :cookie_key)
+    [gettext, default_locale, cookie_key]
+  end
 
-  def call(%{params: %{"locale" => requested_locale}} = conn, [gettext, default_locale]) do
+  def call(%{params: %{"locale" => requested_locale}} = conn, [gettext, default_locale, cookie_key]) do
     if Enum.member?(supported_locales(gettext), requested_locale) do
       Gettext.put_locale(gettext, requested_locale)
       conn |> assign(:locale, requested_locale)
     else
       locale = determine_base_or_default_locale(gettext, requested_locale, default_locale)
-      path = rewrite_path(conn, gettext, locale )
+      path = rewrite_path(conn, gettext, locale, locale_from_cookie(conn, cookie_key))
       conn |> redirect_to(path) |> halt
     end
   end
 
-  def call(conn, [gettext, default_locale]) do
-    path = rewrite_path(conn, gettext, default_locale)
-    Gettext.put_locale(gettext, default_locale)
-    conn |> assign(:locale, default_locale) |> redirect_to(path) |> halt
+  def call(conn, [gettext, default_locale, cookie_key]) do
+    path = rewrite_path(conn, gettext, default_locale, locale_from_cookie(conn, cookie_key))
+    conn |> redirect_to(path) |> halt
   end
 
   defp determine_base_or_default_locale(gettext, requested_locale, default_locale) do
@@ -27,8 +31,11 @@ defmodule SetLocale do
 
   defp supported_locales(gettext), do: Gettext.known_locales(gettext)
 
-  defp rewrite_path(%{request_path: request_path} = conn, gettext, locale) do
-    default_locale = SetLocale.Headers.extract_accept_language(conn) |> Enum.find(locale, fn accepted_locale -> Enum.member?(supported_locales(gettext), accepted_locale) end)
+  defp rewrite_path(%{request_path: request_path} = conn, gettext, locale, locale_override) do
+    default_locale = locale_override ||
+                     SetLocale.Headers.extract_accept_language(conn)
+                     |> Enum.find(locale, fn accepted_locale -> Enum.member?(supported_locales(gettext), accepted_locale) end)
+
     request_path
     |> maybe_strip_unsupported_locale
     |> localize_path(default_locale)
@@ -56,5 +63,8 @@ defmodule SetLocale do
 
   defp get_redirect_path(%{query_string: query_string}, path) when query_string != "", do: path <> "?#{query_string}"
   defp get_redirect_path(_conn, path), do: path
-end
 
+  defp locale_from_cookie(conn, cookie_key) do
+    conn.cookies[cookie_key]
+  end
+end
