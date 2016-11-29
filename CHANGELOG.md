@@ -1,3 +1,19 @@
+## 0.2.0 (2016-11-29)
+Now also taking into account cookie settings for locale as suggested and initially written by @dirkholzapfel (Thank you!).
+The current precedence and fallback chain is now :
+
+- locale in url (i.e. /nl-nl/)
+- cookie
+- request headers accept-language
+- default locale from config
+
+This update contains a deprecation waring for the Plug config the new config is now :
+
+```plug SetLocale, gettext: MyApp.Gettext, default_locale: "en-gb", cookie_key: "locale")```
+
+The cookie key is optional, dont forget if you want to use this feature that you application actually stores the preferred locale on the cookie with the same key :)
+
+
 ## 0.1.3 (2016-11-25)
 Including a bigfix by @dirkholzapfel which implement correct handling for URLs without given locale, Thanks !
 

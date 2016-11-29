@@ -9,16 +9,21 @@ defmodule SetLocaleTest do
   end
 
   @cookie_key "locale"
-  @default_options             [MyGettext, "en-gb", nil]
-  @default_options_with_cookie [MyGettext, "en-gb", @cookie_key]
+  @default_options             %SetLocale.Config{gettext: MyGettext, default_locale: "en-gb"}
+  @default_options_with_cookie %SetLocale.Config{gettext: MyGettext, default_locale: "en-gb", cookie_key: @cookie_key}
 
   describe "init" do
+
+    test "it supports a legacy config" do
+      assert SetLocale.init(MyGettext, "en-gb") == %SetLocale.Config{gettext: SetLocaleTest.MyGettext, default_locale: "en-gb", cookie_key: nil}
+    end
+
     test "it sets cookie_key to nil if not given" do
-      assert SetLocale.init(gettext: MyGettext, default_locale: "en-gb") == [SetLocaleTest.MyGettext, "en-gb", nil]
+      assert SetLocale.init(gettext: MyGettext, default_locale: "en-gb") == %SetLocale.Config{gettext: SetLocaleTest.MyGettext, default_locale: "en-gb", cookie_key: nil}
     end
 
     test "it forwards cookie_key option" do
-      assert SetLocale.init(gettext: MyGettext, default_locale: "en-gb", cookie_key: "locale") == [SetLocaleTest.MyGettext, "en-gb", "locale"]
+      assert SetLocale.init(gettext: MyGettext, default_locale: "en-gb", cookie_key: "locale") == %SetLocale.Config{gettext: SetLocaleTest.MyGettext, default_locale: "en-gb", cookie_key: "locale"}
     end
   end
 
