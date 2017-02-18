@@ -69,7 +69,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:set_locale, "~> 0.1.0"}]
+      [{:set_locale, "~> 0.2.0"}]
     end
     ```
 
