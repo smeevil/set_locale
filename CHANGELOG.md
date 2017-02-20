@@ -1,3 +1,6 @@
+## 0.2.1 (2017-02-20)
+bumped dependency versions
+
 ## 0.2.0 (2016-11-29)
 Now also taking into account cookie settings for locale as suggested and initially written by @dirkholzapfel (Thank you!).
 The current precedence and fallback chain is now :
