@@ -1,3 +1,6 @@
+## 0.2.2 (2017-03-31)
+bumped dependency versions
+
 ## 0.2.1 (2017-02-20)
 bumped dependency versions
 
