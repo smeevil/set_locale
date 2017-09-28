@@ -92,6 +92,4 @@ defmodule SetLocale do
     SetLocale.Headers.extract_accept_language(conn)
     |> Enum.find(nil, fn accepted_locale -> Enum.member?(supported_locales(gettext), accepted_locale) end)
   end
-
-
 end

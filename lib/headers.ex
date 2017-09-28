@@ -8,6 +8,8 @@ defmodule SetLocale.Headers do
         |> Enum.map(&parse_language_option/1)
         |> Enum.sort(&(&1.quality > &2.quality))
         |> Enum.map(&(&1.tag))
+        |> Enum.reject(&is_nil/1)
+        |> ensure_language_fallbacks()
       _ ->
         []
     end
@@ -23,6 +25,20 @@ defmodule SetLocale.Headers do
     end
 
     %{tag: captures["tag"], quality: quality}
+  end
+
+  defp ensure_language_fallbacks(tags) do
+    Enum.flat_map tags, fn tag ->
+      case String.split(tag, "-") do
+        [language, _country_variant] ->
+          if Enum.member?(tags, language) do
+            [tag]
+          else
+            [tag, language]
+          end
+        [_language] -> [tag]
+      end
+    end
   end
 
 end
