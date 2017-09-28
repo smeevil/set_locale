@@ -13,9 +13,7 @@ defmodule SetLocaleTest do
   @default_options_with_cookie %SetLocale.Config{gettext: MyGettext, default_locale: "en-gb", cookie_key: @cookie_key}
 
   describe "init" do
-
     test "it supports a legacy config" do
-
       assert SetLocale.init([MyGettext, "en-gb"]) == %SetLocale.Config{gettext: SetLocaleTest.MyGettext, default_locale: "en-gb", cookie_key: nil}
     end
 
@@ -45,6 +43,17 @@ defmodule SetLocaleTest do
       conn = Phoenix.ConnTest.build_conn(:get, "/", %{})
       |> Plug.Conn.fetch_cookies()
       |> Plug.Conn.put_req_header("accept-language","de, en-gb;q=0.8, nl;q=0.9, en;q=0.7")
+      |> SetLocale.call(@default_options)
+
+      assert redirected_to(conn) == "/nl"
+    end
+
+    test "when headers contain accept-language with full language tags with country variants,
+          it should redirect to the language if country variant is not supported" do
+      assert Gettext.get_locale(MyGettext) == "en"
+      conn = Phoenix.ConnTest.build_conn(:get, "/", %{})
+      |> Plug.Conn.fetch_cookies()
+      |> Plug.Conn.put_req_header("accept-language","de, en-gb;q=0.8, nl-nl;q=0.9, en;q=0.7, *;q=0.5")
       |> SetLocale.call(@default_options)
 
       assert redirected_to(conn) == "/nl"
