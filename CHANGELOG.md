@@ -1,3 +1,9 @@
+## 0.2.2 (2017-09-28)
+- Thanks @dirkholzapfel for adding fallback to "nl" if "nl-nl" is given in accept header
+- reformatted code here and there
+- bumped dependency versions
+
+
 ## 0.2.2 (2017-03-31)
 bumped dependency versions
 

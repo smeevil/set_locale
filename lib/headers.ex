@@ -10,14 +10,14 @@ defmodule SetLocale.Headers do
         |> Enum.map(&(&1.tag))
         |> Enum.reject(&is_nil/1)
         |> ensure_language_fallbacks()
+
       _ ->
         []
     end
   end
 
   defp parse_language_option(string) do
-    captures = ~r/^\s?(?<tag>[\w\-]+)(?:;q=(?<quality>[\d\.]+))?$/i
-    |> Regex.named_captures(string)
+    captures = Regex.named_captures(~r/^\s?(?<tag>[\w\-]+)(?:;q=(?<quality>[\d\.]+))?$/i, string)
 
     quality = case Float.parse(captures["quality"] || "1.0") do
       {val, _} -> val
@@ -30,15 +30,9 @@ defmodule SetLocale.Headers do
   defp ensure_language_fallbacks(tags) do
     Enum.flat_map tags, fn tag ->
       case String.split(tag, "-") do
-        [language, _country_variant] ->
-          if Enum.member?(tags, language) do
-            [tag]
-          else
-            [tag, language]
-          end
+        [language, _country_variant] -> if Enum.member?(tags, language), do: [tag], else: [tag, language]
         [_language] -> [tag]
       end
     end
   end
-
 end
