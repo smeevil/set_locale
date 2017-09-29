@@ -29,10 +29,8 @@ defmodule SetLocale.Headers do
 
   defp ensure_language_fallbacks(tags) do
     Enum.flat_map tags, fn tag ->
-      case String.split(tag, "-") do
-        [language, _country_variant] -> if Enum.member?(tags, language), do: [tag], else: [tag, language]
-        [_language] -> [tag]
-      end
+      [language | _] = String.split(tag, "-")
+      if Enum.member?(tags, language), do: [tag], else: [tag, language]
     end
   end
 end
