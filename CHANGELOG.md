@@ -1,4 +1,6 @@
 ## 0.2.2 (2017-09-28)
+- Thanks @dirkholzapfel for bugfixing an accept-language header like "zh-Hans-CN;q=0.5"
+## 0.2.2 (2017-09-28)
 - Thanks @dirkholzapfel for adding fallback to "nl" if "nl-nl" is given in accept header
 - reformatted code here and there
 - bumped dependency versions
