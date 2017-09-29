@@ -81,6 +81,16 @@ defmodule SetLocaleTest do
       assert redirected_to(conn) == "/en-gb"
     end
 
+    test "when headers contain accept-language in incorrect format or language tags with larger range it does not fail" do
+      assert Gettext.get_locale(MyGettext) == "en"
+      conn = Phoenix.ConnTest.build_conn(:get, "/", %{})
+             |> Plug.Conn.fetch_cookies()
+             |> Plug.Conn.put_req_header("accept-language", ",, hell#foo-bar-baz-1234%, zh-Hans-CN;q=0.5")
+             |> SetLocale.call(@default_options)
+
+      assert redirected_to(conn) == "/en-gb"
+    end
+
     test "it redirects to a prefix with default locale" do
       conn = Phoenix.ConnTest.build_conn(:get, "/foo/bar/baz", %{})
              |> Plug.Conn.fetch_cookies()
