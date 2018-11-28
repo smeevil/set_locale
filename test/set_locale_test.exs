@@ -166,6 +166,25 @@ defmodule SetLocaleTest do
       assert redirected_to(conn) == "/en-gb/foo/bar"
     end
 
+    test "when headers contain referer with valid locale in the path, it should use redirect to that locale if supported" do
+      conn = Phoenix.ConnTest.build_conn(:get, "/foo/bar", %{"locale" => "foo"})
+             |> Plug.Conn.fetch_cookies()
+             |> Plug.Conn.put_req_header("referer", "/nl/origin")
+             |> SetLocale.call(@default_options)
+
+      assert redirected_to(conn) == "/nl/foo/bar"
+    end
+
+    test "when headers contain referer without valid locale in the path, it should ignore it and use the default" do
+      conn = Phoenix.ConnTest.build_conn(:get, "/foo/bar", %{"locale" => "foo"})
+             |> Plug.Conn.fetch_cookies()
+             |> Plug.Conn.put_req_header("referer", "/origin")
+             |> SetLocale.call(@default_options)
+
+      assert redirected_to(conn) == "/en-gb/foo/bar"
+    end
+
+
     test "when headers contain accept-language, it should redirect to the header locale if supported" do
       conn = Phoenix.ConnTest.build_conn(:get, "/foo/bar", %{"locale" => "foo"})
              |> Plug.Conn.fetch_cookies()
