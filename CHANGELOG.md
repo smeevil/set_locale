@@ -1,14 +1,15 @@
 ## 0.2.6 (2019-02-21)
 - Thanks @mtarnovan for fixing a compilation warning
 
-## 0.2.3 (2019-02-21)
+## 0.2.5 (2019-02-21)
 - Thanks @mtarnovan and @ohrite for relaxing the gettext and phoenix dependencies
 - Thanks @narnach for making the locale stick and using the http referer header.
 - bumped deps
 
-## 0.2.2 (2017-09-28)
+## 0.2.4 (2017-09-28)
 - Thanks @dirkholzapfel for bugfixing an accept-language header like "zh-Hans-CN;q=0.5"
-## 0.2.2 (2017-09-28)
+
+## 0.2.3 (2017-09-28)
 - Thanks @dirkholzapfel for adding fallback to "nl" if "nl-nl" is given in accept header
 - reformatted code here and there
 - bumped dependency versions
