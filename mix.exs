@@ -12,7 +12,7 @@ defmodule SetLocale.Mixfile do
       start_permanent: Mix.env == :prod,
       deps: deps(),
       preferred_cli_env: [
-        "coveralls": :test,
+        coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
