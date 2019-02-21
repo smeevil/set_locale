@@ -62,6 +62,7 @@ defmodule SetLocale do
 
   defp determine_locale(conn, nil, config) do
     get_locale_from_cookie(conn, config)
+    || get_locale_from_http_referrer(conn)
     || get_locale_from_header(conn, config)
     || config.default_locale
   end
@@ -76,12 +77,36 @@ defmodule SetLocale do
     end
   end
 
+  # Attempt to extract a locale from the HTTP "referer" header.
+  # If that url exists and had a language prefix, it's a good indication of what locale the user prefers.
+  # And yes, it is referer, not referrer. A typo in the original HTTP spec means it will haunt us forever.
+  defp get_locale_from_http_referrer(conn) do
+    conn
+    |> get_req_header("referer")
+    |> case do
+         [referrer] when is_binary(referrer) ->
+           uri = URI.parse(referrer)
+           maybe_extract_locale(uri.path)
+         _ ->
+           nil
+       end
+  end
+
   defp supported_locales(config), do: Gettext.known_locales(config.gettext)
 
   defp maybe_strip_unsupported_locale(request_path) do
-    [_, maybe_locale | _] = String.split(request_path, "/")
-    if is_locale?(maybe_locale), do: strip_unsupported_locale(request_path), else: request_path
+    maybe_locale = maybe_extract_locale(request_path)
+    if maybe_locale, do: strip_unsupported_locale(request_path), else: request_path
   end
+
+  defp maybe_extract_locale(request_path) when is_binary(request_path) do
+    case String.split(request_path, "/") do
+      [_, maybe_locale | _] ->
+        if is_locale?(maybe_locale), do: maybe_locale, else: nil
+      _ -> nil
+    end
+  end
+  defp maybe_extract_locale(_), do: nil
 
   defp is_locale?(maybe_locale), do: Regex.match?(~r/^[a-z]{2}(-[a-z]{2})?$/, maybe_locale)
 
