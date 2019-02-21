@@ -1,3 +1,6 @@
+## 0.2.6 (2019-02-21)
+- Thanks @mtarnovan for fixing a compilation warning
+
 ## 0.2.3 (2019-02-21)
 - Thanks @mtarnovan and @ohrite for relaxing the gettext and phoenix dependencies
 - Thanks @narnach for making the locale stick and using the http referer header.
