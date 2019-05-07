@@ -126,7 +126,10 @@ defmodule SetLocale do
   defp get_redirect_path(%{query_string: query_string}, path) when query_string != "", do: path <> "?#{query_string}"
   defp get_redirect_path(_conn, path), do: path
 
-  defp get_locale_from_cookie(conn, config), do: conn.cookies[config.cookie_key]
+  defp get_locale_from_cookie(conn, config) do
+    locale = conn.cookies[config.cookie_key]
+    if Enum.member?(supported_locales(config), locale), do: locale
+  end
 
   defp get_locale_from_header(conn, gettext) do
     conn

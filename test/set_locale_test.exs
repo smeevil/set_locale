@@ -130,6 +130,16 @@ defmodule SetLocaleTest do
 
       assert redirected_to(conn) == "/nl/foo/bar/baz"
     end
+
+    test "when the cookie is an unsupported locale, it should use the default locale" do
+      assert Gettext.get_locale(MyGettext) == "en"
+      conn = Phoenix.ConnTest.build_conn(:get, "/", %{})
+             |> Plug.Conn.put_resp_cookie(@cookie_key, "pl")
+             |> Plug.Conn.fetch_cookies()
+             |> SetLocale.call(@default_options_with_cookie)
+
+      assert redirected_to(conn) == "/en-gb"
+    end
   end
 
 
