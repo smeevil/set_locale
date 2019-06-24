@@ -1,3 +1,6 @@
+## 0.2.7 (2019-06-24)
+- Thanks @mtarnovan and @angelikatyborska for fixing an issue when a cookie used a language that was not supported
+
 ## 0.2.6 (2019-02-21)
 - Thanks @mtarnovan for fixing a compilation warning
 
