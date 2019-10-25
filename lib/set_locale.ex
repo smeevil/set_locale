@@ -32,7 +32,7 @@ defmodule SetLocale do
         } = conn,
         config
       ) do
-    if Enum.member?(supported_locales(config), requested_locale) do
+    if supported_locale?(requested_locale, config) do
       Gettext.put_locale(config.gettext, requested_locale)
       assign(conn, :locale, requested_locale)
     else
@@ -61,16 +61,20 @@ defmodule SetLocale do
   end
 
   defp determine_locale(conn, nil, config) do
-    get_locale_from_cookie(conn, config)
-    || get_locale_from_http_referrer(conn)
-    || get_locale_from_header(conn, config)
-    || config.default_locale
+    determined_locale =
+      get_locale_from_cookie(conn, config)
+      || get_locale_from_http_referrer(conn)
+      || get_locale_from_header(conn, config)
+
+    if supported_locale?(determined_locale, config),
+      do: determined_locale,
+      else: config.default_locale
   end
 
   defp determine_locale(conn, requested_locale, config) do
     base = hd String.split(requested_locale, "-")
 
-    if (is_locale?(requested_locale) and Enum.member?(supported_locales(config), base)) do
+    if (is_locale?(requested_locale) and supported_locale?(base, config)) do
       base
     else
       determine_locale(conn, nil, config)
@@ -131,6 +135,8 @@ defmodule SetLocale do
   defp get_locale_from_header(conn, gettext) do
     conn
     |> SetLocale.Headers.extract_accept_language
-    |> Enum.find(nil, fn accepted_locale -> Enum.member?(supported_locales(gettext), accepted_locale) end)
+    |> Enum.find(nil, fn accepted_locale -> supported_locale?(accepted_locale, gettext) end)
   end
+
+  defp supported_locale?(locale, config), do: Enum.member?(supported_locales(config), locale)
 end
