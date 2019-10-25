@@ -9,15 +9,16 @@ defmodule SetLocaleTest do
   end
 
   @cookie_key "locale"
-  @default_options %SetLocale.Config{gettext: MyGettext, default_locale: "en-gb"}
+  @default_locale "en-gb"
+  @default_options %SetLocale.Config{gettext: MyGettext, default_locale: @default_locale}
   @default_options_with_cookie %SetLocale.Config{
     gettext: MyGettext,
-    default_locale: "en-gb",
+    default_locale: @default_locale,
     cookie_key: @cookie_key
   }
   @default_options_with_additional_locales %SetLocale.Config{
     gettext: MyGettext,
-    default_locale: "en-gb",
+    default_locale: @default_locale,
     additional_locales: ["fr", "es"]
   }
 
@@ -100,7 +101,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb"
+      assert redirected_to(conn) == "/#{@default_locale}"
     end
 
     test "when headers contain accept-language, it should redirect to that locale if supported" do
@@ -140,7 +141,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.put_req_header("accept-language", "de, fr;q=0.9")
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb"
+      assert redirected_to(conn) == "/#{@default_locale}"
     end
 
     test "when headers contain accept-language in incorrect format or language tags with larger range it does not fail" do
@@ -155,7 +156,7 @@ defmodule SetLocaleTest do
         )
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb"
+      assert redirected_to(conn) == "/#{@default_locale}"
     end
 
     test "it redirects to a prefix with default locale" do
@@ -164,7 +165,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb/foo/bar/baz"
+      assert redirected_to(conn) == "/#{@default_locale}/foo/bar/baz"
     end
   end
 
@@ -212,7 +213,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb/foo/bar/baz"
+      assert redirected_to(conn) == "/#{@default_locale}/foo/bar/baz"
     end
   end
 
@@ -236,7 +237,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options_with_cookie)
 
-      assert redirected_to(conn) == "/en-gb"
+      assert redirected_to(conn) == "/#{@default_locale}"
     end
   end
 
@@ -247,7 +248,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb/foo/bar"
+      assert redirected_to(conn) == "/#{@default_locale}/foo/bar"
     end
 
     test "when headers contain referer with valid locale in the path, it should use redirect to that locale if supported" do
@@ -267,7 +268,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb/foo/bar"
+      assert redirected_to(conn) == "/#{@default_locale}/foo/bar"
     end
 
     test "when headers contain referer without valid locale in the path, it should ignore it and use the default" do
@@ -277,7 +278,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.put_req_header("referer", "/origin")
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb/foo/bar"
+      assert redirected_to(conn) == "/#{@default_locale}/foo/bar"
     end
 
     test "when headers contain accept-language, it should redirect to the header locale if supported" do
@@ -297,7 +298,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.put_req_header("accept-language", "de, fr;q=0.9")
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb/foo/bar"
+      assert redirected_to(conn) == "/#{@default_locale}/foo/bar"
     end
   end
 
@@ -364,7 +365,7 @@ defmodule SetLocaleTest do
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
-      assert redirected_to(conn) == "/en-gb/foo/bar?foo=bar&baz=true"
+      assert redirected_to(conn) == "/#{@default_locale}/foo/bar?foo=bar&baz=true"
     end
 
     test "it should allow non Gettext locales that are whitelisted via additional_locales option
@@ -376,7 +377,7 @@ defmodule SetLocaleTest do
 
       assert conn.status == nil
       assert conn.assigns == %{locale: "fr"}
-      assert Gettext.get_locale(MyGettext) == "en-gb"
+      assert Gettext.get_locale(MyGettext) == @default_locale
     end
   end
 end
