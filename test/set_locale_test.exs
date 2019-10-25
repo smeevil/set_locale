@@ -11,14 +11,28 @@ defmodule SetLocaleTest do
   @cookie_key "locale"
   @default_options             %SetLocale.Config{gettext: MyGettext, default_locale: "en-gb"}
   @default_options_with_cookie %SetLocale.Config{gettext: MyGettext, default_locale: "en-gb", cookie_key: @cookie_key}
+  @default_options_with_additional_locales %SetLocale.Config{
+    gettext: MyGettext,
+    default_locale: "en-gb",
+    additional_locales: ["fr", "es"]
+  }
 
   describe "init" do
     test "it supports a legacy config" do
       assert SetLocale.init([MyGettext, "en-gb"]) == %SetLocale.Config{
                gettext: SetLocaleTest.MyGettext,
                default_locale: "en-gb",
-               cookie_key: nil
+               cookie_key: nil,
+               additional_locales: []
              }
+    end
+
+    test "it enforces gettext key" do
+      assert_raise ArgumentError, fn -> SetLocale.init(default_locale: "en-gb") end
+    end
+
+    test "it enforces default_locale key" do
+      assert_raise ArgumentError, fn -> SetLocale.init(gettext: MyGettext) end
     end
 
     test "it sets cookie_key to nil if not given" do
@@ -29,11 +43,46 @@ defmodule SetLocaleTest do
              }
     end
 
-    test "it forwards cookie_key option" do
-      assert SetLocale.init(gettext: MyGettext, default_locale: "en-gb", cookie_key: "locale") == %SetLocale.Config{
+    test "it sets additional_locales to [] if not given" do
+      assert SetLocale.init(gettext: MyGettext, default_locale: "en-gb") == %SetLocale.Config{
                gettext: SetLocaleTest.MyGettext,
                default_locale: "en-gb",
-               cookie_key: "locale"
+               additional_locales: []
+             }
+    end
+
+    test "it forwards cookie_key option" do
+      assert SetLocale.init(gettext: MyGettext, default_locale: "en-gb", cookie_key: "locale") ==
+               %SetLocale.Config{
+                 gettext: SetLocaleTest.MyGettext,
+                 default_locale: "en-gb",
+                 cookie_key: "locale"
+               }
+    end
+
+    test "it forwards additional_locales option" do
+      assert SetLocale.init(
+               gettext: MyGettext,
+               default_locale: "en-gb",
+               additional_locales: ["fr", "es"]
+             ) == %SetLocale.Config{
+               gettext: SetLocaleTest.MyGettext,
+               default_locale: "en-gb",
+               additional_locales: ["fr", "es"]
+             }
+    end
+
+    test "it works with all options given" do
+      assert SetLocale.init(
+               gettext: MyGettext,
+               default_locale: "en-gb",
+               cookie_key: "locale",
+               additional_locales: ["fr", "es"]
+             ) == %SetLocale.Config{
+               gettext: SetLocaleTest.MyGettext,
+               default_locale: "en-gb",
+               cookie_key: "locale",
+               additional_locales: ["fr", "es"]
              }
     end
   end
@@ -282,6 +331,18 @@ defmodule SetLocaleTest do
              |> SetLocale.call(@default_options)
 
       assert redirected_to(conn) == "/en-gb/foo/bar?foo=bar&baz=true"
+    end
+
+    test "it should allow non Gettext locales that are whitelisted via additional_locales option
+          and assign it, but should set Gettext to the default_locale" do
+      conn =
+        Phoenix.ConnTest.build_conn(:get, "/fr/foo/bar/baz", %{"locale" => "fr"})
+        |> Plug.Conn.fetch_cookies()
+        |> SetLocale.call(@default_options_with_additional_locales)
+
+      assert conn.status == nil
+      assert conn.assigns == %{locale: "fr"}
+      assert Gettext.get_locale(MyGettext) == "en-gb"
     end
   end
 end

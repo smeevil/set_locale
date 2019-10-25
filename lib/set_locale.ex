@@ -2,26 +2,27 @@ defmodule SetLocale do
   import Plug.Conn
 
   defmodule Config do
-    defstruct gettext: nil, default_locale: nil, cookie_key: nil
+    @enforce_keys [:gettext, :default_locale]
+    defstruct [:gettext, :default_locale, :cookie_key, additional_locales: []]
   end
 
-  def init(gettext: gettext, default_locale: default_locale, cookie_key: cookie_key) do
-    %Config{gettext: gettext, default_locale: default_locale, cookie_key: cookie_key}
-  end
-  def init(gettext: gettext, default_locale: default_locale) do
-    %Config{gettext: gettext, default_locale: default_locale, cookie_key: nil}
-  end
+  def init(opts) when is_tuple(hd(opts)), do: struct!(Config, opts)
+
   def init([gettext, default_locale]) do
-    unless Mix.env == :test do
-      IO.warn ~S(
-        This config style has been deprecated for for set_locale. Please update the old style config:
+    unless Mix.env() == :test do
+      IO.warn(
+        ~S(
+        This config style has been deprecated for set_locale. Please update the old style config:
         plug SetLocale, [MyApp.Gettext, "en-gb"]
 
         to the new config:
         plug SetLocale, gettext: MyApp.Gettext, default_locale: "en-gb", cookie_key: "preferred_locale"]
-      ), Macro.Env.stacktrace(__ENV__)
+      ),
+        Macro.Env.stacktrace(__ENV__)
+      )
     end
-    %Config{gettext: gettext, default_locale: default_locale, cookie_key: nil}
+
+    %Config{gettext: gettext, default_locale: default_locale}
   end
 
   def call(
@@ -33,7 +34,10 @@ defmodule SetLocale do
         config
       ) do
     if supported_locale?(requested_locale, config) do
-      Gettext.put_locale(config.gettext, requested_locale)
+      if Enum.member?(config.additional_locales, requested_locale),
+        do: Gettext.put_locale(config.gettext, config.default_locale),
+        else: Gettext.put_locale(config.gettext, requested_locale)
+
       assign(conn, :locale, requested_locale)
     else
       path = rewrite_path(conn, requested_locale, config)
@@ -96,7 +100,8 @@ defmodule SetLocale do
        end
   end
 
-  defp supported_locales(config), do: Gettext.known_locales(config.gettext)
+  defp supported_locales(config),
+    do: Gettext.known_locales(config.gettext) ++ config.additional_locales
 
   defp maybe_strip_unsupported_locale(request_path) do
     maybe_locale = maybe_extract_locale(request_path)
