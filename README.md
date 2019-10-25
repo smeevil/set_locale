@@ -43,14 +43,20 @@ defmodule MyApp.Router do
     plug :accepts, ["html"]
     ...
     # cookie_key and additional_locales are optional
-    plug SetLocale, gettext: MyApp.Gettext, default_locale: "en", cookie_key: "project_locale", additional_locales: ["fr", "es"]
+    plug(SetLocale,
+      gettext: MyApp.Gettext,
+      default_locale: "en",
+      cookie_key: "project_locale",
+      additional_locales: ["fr", "es"]
+    )
   end
 
   ...
 
   scope "/", MyApp do
     pipe_through :browser
-    get "/", PageController, :dummy # you need this entry to support the default root without a locale, it will never be called
+    # you need this entry to support the default root without a locale, it will never be called
+    get "/", PageController, :dummy
   end
 
   scope "/:locale", MyApp do
