@@ -66,9 +66,9 @@ defmodule SetLocale do
 
   defp determine_locale(conn, nil, config) do
     determined_locale =
-      get_locale_from_cookie(conn, config)
-      || get_locale_from_http_referrer(conn)
-      || get_locale_from_header(conn, config)
+      get_locale_from_cookie(conn, config) ||
+        get_locale_from_http_referrer(conn) ||
+        get_locale_from_header(conn, config)
 
     if supported_locale?(determined_locale, config),
       do: determined_locale,
@@ -76,9 +76,9 @@ defmodule SetLocale do
   end
 
   defp determine_locale(conn, requested_locale, config) do
-    base = hd String.split(requested_locale, "-")
+    base = hd(String.split(requested_locale, "-"))
 
-    if (is_locale?(requested_locale) and supported_locale?(base, config)) do
+    if is_locale?(requested_locale) and supported_locale?(base, config) do
       base
     else
       determine_locale(conn, nil, config)
@@ -92,12 +92,13 @@ defmodule SetLocale do
     conn
     |> get_req_header("referer")
     |> case do
-         [referrer] when is_binary(referrer) ->
-           uri = URI.parse(referrer)
-           maybe_extract_locale(uri.path)
-         _ ->
-           nil
-       end
+      [referrer] when is_binary(referrer) ->
+        uri = URI.parse(referrer)
+        maybe_extract_locale(uri.path)
+
+      _ ->
+        nil
+    end
   end
 
   defp supported_locales(config),
@@ -112,9 +113,12 @@ defmodule SetLocale do
     case String.split(request_path, "/") do
       [_, maybe_locale | _] ->
         if is_locale?(maybe_locale), do: maybe_locale, else: nil
-      _ -> nil
+
+      _ ->
+        nil
     end
   end
+
   defp maybe_extract_locale(_), do: nil
 
   defp is_locale?(maybe_locale), do: Regex.match?(~r/^[a-z]{2}(-[a-z]{2})?$/, maybe_locale)
@@ -132,14 +136,16 @@ defmodule SetLocale do
     Phoenix.Controller.redirect(conn, to: path)
   end
 
-  defp get_redirect_path(%{query_string: query_string}, path) when query_string != "", do: path <> "?#{query_string}"
+  defp get_redirect_path(%{query_string: query_string}, path) when query_string != "",
+    do: path <> "?#{query_string}"
+
   defp get_redirect_path(_conn, path), do: path
 
   defp get_locale_from_cookie(conn, config), do: conn.cookies[config.cookie_key]
 
   defp get_locale_from_header(conn, gettext) do
     conn
-    |> SetLocale.Headers.extract_accept_language
+    |> SetLocale.Headers.extract_accept_language()
     |> Enum.find(nil, fn accepted_locale -> supported_locale?(accepted_locale, gettext) end)
   end
 
