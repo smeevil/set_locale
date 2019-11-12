@@ -326,6 +326,15 @@ defmodule SetLocaleTest do
   end
 
   describe "when an existing locale is given" do
+    test "when a root path is requested, it should redirect to the requested locale" do
+      assert Gettext.get_locale(MyGettext) == "en"
+      conn = Phoenix.ConnTest.build_conn(:get, "/", %{"locale" => "nl"})
+             |> Plug.Conn.fetch_cookies()
+             |> SetLocale.call(@default_options)
+
+      assert redirected_to(conn) == "/nl"
+    end
+
     test "with sibling: it should only assign it" do
       conn =
         Phoenix.ConnTest.build_conn(:get, "/en-gb/foo/bar/baz", %{"locale" => "en-gb"})

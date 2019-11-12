@@ -27,17 +27,17 @@ defmodule SetLocale do
 
   def call(
         %{
+          request_path: request_path,
           params: %{
             "locale" => requested_locale
           }
         } = conn,
         config
       ) do
-    if supported_locale?(requested_locale, config) do
+    if request_path != "/" and supported_locale?(requested_locale, config) do
       if Enum.member?(config.additional_locales, requested_locale),
         do: Gettext.put_locale(config.gettext, config.default_locale),
         else: Gettext.put_locale(config.gettext, requested_locale)
-
       assign(conn, :locale, requested_locale)
     else
       path = rewrite_path(conn, requested_locale, config)
