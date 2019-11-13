@@ -1,3 +1,6 @@
+## 0.2.8 (2019-11-13)
+- Thanks @dirkholzapfel and @angelikatyborska for adding a whitelist option and fixing a failure when given an invalid locale
+
 ## 0.2.7 (2019-06-24)
 - Thanks @mtarnovan and @angelikatyborska for fixing an issue when a cookie used a language that was not supported
 
