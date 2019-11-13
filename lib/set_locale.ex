@@ -2,38 +2,42 @@ defmodule SetLocale do
   import Plug.Conn
 
   defmodule Config do
-    defstruct gettext: nil, default_locale: nil, cookie_key: nil
+    @enforce_keys [:gettext, :default_locale]
+    defstruct [:gettext, :default_locale, :cookie_key, additional_locales: []]
   end
 
-  def init(gettext: gettext, default_locale: default_locale, cookie_key: cookie_key) do
-    %Config{gettext: gettext, default_locale: default_locale, cookie_key: cookie_key}
-  end
-  def init(gettext: gettext, default_locale: default_locale) do
-    %Config{gettext: gettext, default_locale: default_locale, cookie_key: nil}
-  end
+  def init(opts) when is_tuple(hd(opts)), do: struct!(Config, opts)
+
   def init([gettext, default_locale]) do
-    unless Mix.env == :test do
-      IO.warn ~S(
-        This config style has been deprecated for for set_locale. Please update the old style config:
+    unless Mix.env() == :test do
+      IO.warn(
+        ~S(
+        This config style has been deprecated for set_locale. Please update the old style config:
         plug SetLocale, [MyApp.Gettext, "en-gb"]
 
         to the new config:
         plug SetLocale, gettext: MyApp.Gettext, default_locale: "en-gb", cookie_key: "preferred_locale"]
-      ), Macro.Env.stacktrace(__ENV__)
+      ),
+        Macro.Env.stacktrace(__ENV__)
+      )
     end
-    %Config{gettext: gettext, default_locale: default_locale, cookie_key: nil}
+
+    %Config{gettext: gettext, default_locale: default_locale}
   end
 
   def call(
         %{
+          request_path: request_path,
           params: %{
             "locale" => requested_locale
           }
         } = conn,
         config
       ) do
-    if supported_locale?(requested_locale, config) do
-      Gettext.put_locale(config.gettext, requested_locale)
+    if request_path != "/" and supported_locale?(requested_locale, config) do
+      if Enum.member?(config.additional_locales, requested_locale),
+        do: Gettext.put_locale(config.gettext, config.default_locale),
+        else: Gettext.put_locale(config.gettext, requested_locale)
       assign(conn, :locale, requested_locale)
     else
       path = rewrite_path(conn, requested_locale, config)
@@ -62,9 +66,9 @@ defmodule SetLocale do
 
   defp determine_locale(conn, nil, config) do
     determined_locale =
-      get_locale_from_cookie(conn, config)
-      || get_locale_from_http_referrer(conn)
-      || get_locale_from_header(conn, config)
+      get_locale_from_cookie(conn, config) ||
+        get_locale_from_http_referrer(conn) ||
+        get_locale_from_header(conn, config)
 
     if supported_locale?(determined_locale, config),
       do: determined_locale,
@@ -72,9 +76,9 @@ defmodule SetLocale do
   end
 
   defp determine_locale(conn, requested_locale, config) do
-    base = hd String.split(requested_locale, "-")
+    base = hd(String.split(requested_locale, "-"))
 
-    if (is_locale?(requested_locale) and supported_locale?(base, config)) do
+    if is_locale?(requested_locale) and supported_locale?(base, config) do
       base
     else
       determine_locale(conn, nil, config)
@@ -88,15 +92,17 @@ defmodule SetLocale do
     conn
     |> get_req_header("referer")
     |> case do
-         [referrer] when is_binary(referrer) ->
-           uri = URI.parse(referrer)
-           maybe_extract_locale(uri.path)
-         _ ->
-           nil
-       end
+      [referrer] when is_binary(referrer) ->
+        uri = URI.parse(referrer)
+        maybe_extract_locale(uri.path)
+
+      _ ->
+        nil
+    end
   end
 
-  defp supported_locales(config), do: Gettext.known_locales(config.gettext)
+  defp supported_locales(config),
+    do: Gettext.known_locales(config.gettext) ++ config.additional_locales
 
   defp maybe_strip_unsupported_locale(request_path) do
     maybe_locale = maybe_extract_locale(request_path)
@@ -107,9 +113,12 @@ defmodule SetLocale do
     case String.split(request_path, "/") do
       [_, maybe_locale | _] ->
         if is_locale?(maybe_locale), do: maybe_locale, else: nil
-      _ -> nil
+
+      _ ->
+        nil
     end
   end
+
   defp maybe_extract_locale(_), do: nil
 
   defp is_locale?(maybe_locale), do: Regex.match?(~r/^[a-z]{2}(-[a-z]{2})?$/, maybe_locale)
@@ -127,14 +136,16 @@ defmodule SetLocale do
     Phoenix.Controller.redirect(conn, to: path)
   end
 
-  defp get_redirect_path(%{query_string: query_string}, path) when query_string != "", do: path <> "?#{query_string}"
+  defp get_redirect_path(%{query_string: query_string}, path) when query_string != "",
+    do: path <> "?#{query_string}"
+
   defp get_redirect_path(_conn, path), do: path
 
   defp get_locale_from_cookie(conn, config), do: conn.cookies[config.cookie_key]
 
   defp get_locale_from_header(conn, gettext) do
     conn
-    |> SetLocale.Headers.extract_accept_language
+    |> SetLocale.Headers.extract_accept_language()
     |> Enum.find(nil, fn accepted_locale -> supported_locale?(accepted_locale, gettext) end)
   end
 

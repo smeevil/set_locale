@@ -42,14 +42,21 @@ defmodule MyApp.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     ...
-    plug SetLocale, gettext: MyApp.Gettext, default_locale: "en", cookie_key: "project_locale" #cookie_key is optional
+    # cookie_key and additional_locales are optional
+    plug(SetLocale,
+      gettext: MyApp.Gettext,
+      default_locale: "en",
+      cookie_key: "project_locale",
+      additional_locales: ["fr", "es"]
+    )
   end
 
   ...
 
   scope "/", MyApp do
     pipe_through :browser
-    get "/", PageController, :dummy #you need this entry to support the default root without a locale, it will never be called
+    # you need this entry to support the default root without a locale, it will never be called
+    get "/", PageController, :dummy
   end
 
   scope "/:locale", MyApp do
@@ -60,6 +67,11 @@ defmodule MyApp.Router do
 end
 ```
 
+### Options
+- gettext: mandatory
+- default_locale: mandatory, used as last step in fallback chain
+- cookie_key: optional, if given the value of the cookie is part of the fallback chain
+- additional_locales: optional, if given it allows to whitelist locales that are not defined via Gettext. Possible scenario: You want to use Gettext and some SaaS localization service (e.g. http://bablic.com/) in parallel. Whitelisting these additional languages allows you to have proper routing for the locales and trigger the wanted JS behaviour depending on the assigned locale in your templates.
 
 ## Installation
 
