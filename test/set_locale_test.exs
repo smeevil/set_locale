@@ -82,12 +82,16 @@ defmodule SetLocaleTest do
                gettext: MyGettext,
                default_locale: "en-gb",
                cookie_key: "locale",
-               additional_locales: ["fr", "es"]
+               additional_locales: ["fr", "es"],
+               cookie_disabled: false,
+               allow_redirect: false
              ) == %SetLocale.Config{
                gettext: SetLocaleTest.MyGettext,
                default_locale: "en-gb",
                cookie_key: "locale",
-               additional_locales: ["fr", "es"]
+               additional_locales: ["fr", "es"],
+               cookie_disabled: false,
+               allow_redirect: false
              }
     end
   end
