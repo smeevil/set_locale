@@ -1,3 +1,6 @@
+## 0.2.9 (2020-06-15)
+- Bump requirements
+
 ## 0.2.6 (2019-02-21)
 - Thanks @mtarnovan for fixing a compilation warning
 
