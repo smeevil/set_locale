@@ -3,7 +3,7 @@ defmodule SetLocale do
 
   defmodule Config do
     @enforce_keys [:gettext, :default_locale]
-    defstruct [:gettext, :default_locale, :cookie_key, additional_locales: []]
+    defstruct [:gettext, :default_locale, :cookie_key, additional_locales: [], redirect: true]
   end
 
   def init(opts) when is_tuple(hd(opts)), do: struct!(Config, opts)
@@ -23,6 +23,14 @@ defmodule SetLocale do
     end
 
     %Config{gettext: gettext, default_locale: default_locale}
+  end
+
+  def call(conn, %{redirect: false} = config) do
+    locale = determine_locale(conn, nil, config)
+    if Enum.member?(config.additional_locales, locale),
+      do: Gettext.put_locale(config.gettext, config.default_locale),
+      else: Gettext.put_locale(config.gettext, locale)
+      assign(conn, :locale, locale)
   end
 
   def call(
