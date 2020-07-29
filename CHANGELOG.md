@@ -1,3 +1,6 @@
+## 0.2.9 (2020-06-15)
+- Bump requirements
+
 ## 0.2.8 (2019-11-13)
 - Thanks @dirkholzapfel and @angelikatyborska for adding a whitelist option and fixing a failure when given an invalid locale
 
