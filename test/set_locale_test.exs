@@ -108,7 +108,7 @@ defmodule SetLocaleTest do
       assert Gettext.get_locale(MyGettext) == "en"
 
       conn =
-        Phoenix.ConnTest.build_conn(:get, "/", %{})
+        Phoenix.ConnTest.build_conn(:head, "/", %{})
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
