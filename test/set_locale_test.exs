@@ -93,11 +93,22 @@ defmodule SetLocaleTest do
   end
 
   describe "when no locale is given and there is no cookie" do
-    test "when a root path is requested, it should redirect to default locale" do
+    test "when a root path is requested, it should redirect to default locale (GET metho)" do
       assert Gettext.get_locale(MyGettext) == "en"
 
       conn =
         Phoenix.ConnTest.build_conn(:get, "/", %{})
+        |> Plug.Conn.fetch_cookies()
+        |> SetLocale.call(@default_options)
+
+      assert redirected_to(conn) == "/#{@default_locale}"
+    end
+
+    test "when a root path is requested, it should redirect to default locale (HEAD method)" do
+      assert Gettext.get_locale(MyGettext) == "en"
+
+      conn =
+        Phoenix.ConnTest.build_conn(:head, "/", %{})
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
@@ -366,9 +377,20 @@ defmodule SetLocaleTest do
       assert redirected_to(conn) == "/nl/foo/bar/baz"
     end
 
-    test "should keep query strings as is" do
+    test "should keep query strings as is (GET method)" do
       conn =
         Phoenix.ConnTest.build_conn(:get, "/de-at/foo/bar?foo=bar&baz=true", %{
+          "locale" => "de-at"
+        })
+        |> Plug.Conn.fetch_cookies()
+        |> SetLocale.call(@default_options)
+
+      assert redirected_to(conn) == "/#{@default_locale}/foo/bar?foo=bar&baz=true"
+    end
+
+    test "should keep query strings as is (HEAD method)" do
+      conn =
+        Phoenix.ConnTest.build_conn(:head, "/de-at/foo/bar?foo=bar&baz=true", %{
           "locale" => "de-at"
         })
         |> Plug.Conn.fetch_cookies()
@@ -387,6 +409,40 @@ defmodule SetLocaleTest do
       assert conn.status == nil
       assert conn.assigns == %{locale: "fr"}
       assert Gettext.get_locale(MyGettext) == @default_locale
+    end
+  end
+
+  describe "when the HTTP method is not get or head" do
+    test "POST not redirected" do
+      conn =
+        Phoenix.ConnTest.build_conn(:post, "/foo/bar")
+        |> Plug.Conn.put_resp_cookie(@cookie_key, "nl")
+        |> Plug.Conn.fetch_cookies()
+        |> SetLocale.call(@default_options_with_cookie)
+
+      assert conn.status == nil
+    end
+
+    test "PUT not redirected" do
+      conn =
+        Phoenix.ConnTest.build_conn(:put, "/foo/bar", %{"locale" => "foo"})
+        |> Plug.Conn.put_resp_cookie(@cookie_key, "nl")
+        |> Plug.Conn.fetch_cookies()
+        |> Plug.Conn.put_req_header("accept-language", "de, en-gb;q=0.8, en;q=0.7")
+        |> SetLocale.call(@default_options_with_cookie)
+
+      assert conn.status == nil
+    end
+
+    test "PATCH not redirected" do
+      conn =
+        Phoenix.ConnTest.build_conn(:path, "/foo/bar", %{"locale" => "foo"})
+        |> Plug.Conn.put_resp_cookie(@cookie_key, "nl")
+        |> Plug.Conn.fetch_cookies()
+        |> Plug.Conn.put_req_header("accept-language", "de, en-gb;q=0.8, en;q=0.7")
+        |> SetLocale.call(@default_options_with_cookie)
+
+      assert conn.status == nil
     end
   end
 end
