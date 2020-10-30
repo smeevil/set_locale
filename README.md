@@ -3,7 +3,7 @@
 
 
 This phoenix plug will help you with I18n url paths.
-It can extract the preffered locale from the browsers accept-language header and redirect if an url without locale has been given.
+It can extract the preffered locale from the browsers accept-language header and redirect if an url without locale has been given (only for GET method).
 It will extract the locale from the url and check if that is valid and supported. If so it will assign it to ```conn.assigns.locale``` and set ```Gettext``` to that locale as well.
 If it is not supported it will redirect to the default locale.
 
