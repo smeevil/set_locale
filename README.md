@@ -63,7 +63,18 @@ defmodule MyApp.Router do
     pipe_through :browser
     get "/", PageController, :index
     ...
+    # If you are using Phoenix LiveView, use the following:
+    live "/livepage", PageLive, session: [:locale]
   end
+end
+```
+
+### Phoenix LiveView
+You need to set the locale in the mount/2 function of your page
+```elixir
+def mount(session, socket) do
+  Gettext.put_locale(session.locale)
+  ... 
 end
 ```
 

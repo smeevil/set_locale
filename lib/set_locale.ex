@@ -38,7 +38,9 @@ defmodule SetLocale do
       if Enum.member?(config.additional_locales, requested_locale),
         do: Gettext.put_locale(config.gettext, config.default_locale),
         else: Gettext.put_locale(config.gettext, requested_locale)
-      assign(conn, :locale, requested_locale)
+      conn
+      |> assign(:locale, requested_locale)
+      |> put_session(:locale, requested_locale)
     else
       path = rewrite_path(conn, requested_locale, config)
 
