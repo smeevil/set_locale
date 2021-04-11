@@ -21,6 +21,12 @@ defmodule SetLocaleTest do
     default_locale: @default_locale,
     additional_locales: ["fr", "es"]
   }
+  @session Plug.Session.init(
+    store: :cookie,
+    key: "_set_locale",
+    encryption_salt: "set_locale",
+    signing_salt: "set_locale"
+  )
 
   describe "init" do
     test "it supports a legacy config" do
@@ -338,11 +344,13 @@ defmodule SetLocaleTest do
     test "with sibling: it should only assign it" do
       conn =
         Phoenix.ConnTest.build_conn(:get, "/en-gb/foo/bar/baz", %{"locale" => "en-gb"})
+        |> Plug.Test.init_test_session(@session)
         |> Plug.Conn.fetch_cookies()
         |> SetLocale.call(@default_options)
 
       assert conn.status == nil
       assert conn.assigns == %{locale: "en-gb"}
+      assert get_session(conn, :locale) == "en-gb"
       assert Gettext.get_locale(MyGettext) == "en-gb"
     end
 
@@ -350,10 +358,12 @@ defmodule SetLocaleTest do
       conn =
         Phoenix.ConnTest.build_conn(:get, "/nl/foo/bar/baz", %{"locale" => "nl"})
         |> Plug.Conn.fetch_cookies()
+        |> Plug.Test.init_test_session(@session)
         |> SetLocale.call(@default_options)
 
       assert conn.status == nil
       assert conn.assigns == %{locale: "nl"}
+      assert get_session(conn, :locale) == "nl"
       assert Gettext.get_locale(MyGettext) == "nl"
     end
 
@@ -382,10 +392,12 @@ defmodule SetLocaleTest do
       conn =
         Phoenix.ConnTest.build_conn(:get, "/fr/foo/bar/baz", %{"locale" => "fr"})
         |> Plug.Conn.fetch_cookies()
+        |> Plug.Test.init_test_session(@session)
         |> SetLocale.call(@default_options_with_additional_locales)
 
       assert conn.status == nil
       assert conn.assigns == %{locale: "fr"}
+      assert get_session(conn, :locale) == "fr"
       assert Gettext.get_locale(MyGettext) == @default_locale
     end
   end
